@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crypto</title>
+    <link rel="stylesheet" href="css/main.css" />
+  </head>
+  <body>
+    <div id="searchMenu">
+      <input type="text" class="searchBar" placeholder="Search" />
+      <!-- <input type="submit" class="submitBtn" value="POST" formaction="/" /> -->
+      <div id="coinList">
+        <ul>
+          <% for (let i = 0; i < coinsList.length; i++) { %>
+          <li>
+            <div>
+              <%= coinsList[i].name %>
+              <form method="post" action="/">
+                <input
+                  type="hidden"
+                  name="symbol"
+                  value="<%= coinsList[i].name %>"
+                />
+                <input type="submit" class="submitBtn" value="POST" />
+              </form>
+            </div>
+          </li>
+          <% } %>
+        </ul>
+      </div>
+    </div>
+
+    <div id="main">
+      <span>Currency: USD</span>
+      <br />
+      <span><%= mainCoinInfo.name %></span>
+      <br />
+      <span><%= mainCoinCurrency.usd %> USD</span>
+      <br />
+      <span>24h_change: <%= mainCoinCurrency.usd_24h_change %></span>
+    </div>
+
+    <div id="multiChart">
+      <div class="chart">
+        <div class="left">
+          <span class="coinSymbol">BTC</span>
+          <span class="coinName">Bitcoin</span>
+        </div>
+        <div class="right">
+          <span class="price">36008</span>
+          <span class="priceChange">0.13153</span>
+        </div>
+      </div>
+      <div class="chart">
+        <div class="left">
+          <span class="coinSymbol">BTC</span>
+          <span class="coinName">Bitcoin</span>
+        </div>
+        <div class="right">
+          <span class="price">36008</span>
+          <span class="priceChange">0.13153</span>
+        </div>
+      </div>
+      <div class="chart">
+        <div class="left">
+          <span class="coinSymbol">BTC</span>
+          <span class="coinName">Bitcoin</span>
+        </div>
+        <div class="right">
+          <span class="price">36008</span>
+          <span class="priceChange">0.13153</span>
+        </div>
+      </div>
+      <div class="chart">
+        <div class="left">
+          <span class="coinSymbol">BTC</span>
+          <span class="coinName">Bitcoin</span>
+        </div>
+        <div class="right">
+          <span class="price">36008</span>
+          <span class="priceChange">0.13153</span>
+        </div>
+      </div>
+      <div class="chart">
+        <div class="left">
+          <span class="coinSymbol">BTC</span>
+          <span class="coinName">Bitcoin</span>
+        </div>
+        <div class="right">
+          <span class="price">36008</span>
+          <span class="priceChange">0.13153</span>
+        </div>
+      </div>
+      <div class="chart">
+        <div class="left">
+          <span class="coinSymbol">BTC</span>
+          <span class="coinName">Bitcoin</span>
+        </div>
+        <div class="right">
+          <span class="price">36008</span>
+          <span class="priceChange">0.13153</span>
+        </div>
+      </div>
+    </div>
+
+    <script src="index.js"></script>
+  </body>
+</html>

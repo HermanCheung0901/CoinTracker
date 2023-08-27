@@ -1,0 +1,53 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+#searchMenu {
+    flex: 1;
+    height: 100vh;
+    text-align: center;
+    position: relative;
+}
+
+/* .searchBar {
+    width: 100%;
+
+}
+
+.submitBtn {
+    position: absolute;
+    right: 0px;
+}
+
+#coinList {
+    height: 95vh;
+    overflow: scroll;
+} */
+
+#main {
+    flex: 3;
+    text-align: center;
+}
+
+#multiChart {
+    flex: 1;
+    text-align: center;
+    height: 100%;
+    margin: 12px 12px;
+    overflow: hidden;
+}
+/* 
+.chart {
+    height: 110px;
+    margin: 12px 8px;
+    border-radius: 8px;
+    background-color: antiquewhite;
+} */
