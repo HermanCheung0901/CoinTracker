@@ -25,19 +25,20 @@ app.get("/", async (req, res) => {
         coinsList = coinsData.data; 
 
         for (let i = 0; i < coinsList.length; i++) {
+            
             if (coinsList[i]['id'] == mainCoinId) {
-                mainCoinInfo = coinsList[i];
-                
+                mainCoinInfo = coinsList[i];              
             }
         }
+
 
         //Get the main coin data that will be displayed in the center
         const result = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${mainCoinId}&vs_currencies=${currency}&include_24hr_change=true`);
         mainCoinCurrency = result.data;
+        
         res.render("index.ejs", {
             mainCoinInfo : mainCoinInfo,
-            mainCoinCurrency : mainCoinCurrency[mainCoinId],
-            coinsList : coinsList,
+            mainCoinCurrency : mainCoinCurrency[mainCoinId],          
         });
     } catch (error) {
         console.log(error.message);
@@ -47,11 +48,11 @@ app.get("/", async (req, res) => {
 })
 
 app.post("/", async (req, res) => {
-    const searchSymbol = req.body.symbol;
-    console.log(searchSymbol)
+    const searchCoinName = req.body.coinName;
+
     try {
         for (let i = 0; i < coinsList.length; i++) {
-            if (coinsList[i]['symbol'] == searchSymbol) {
+            if (coinsList[i]['name'] == searchCoinName) {
                 mainCoinInfo = coinsList[i];
                 mainCoinId = mainCoinInfo.id;
             }
@@ -64,7 +65,7 @@ app.post("/", async (req, res) => {
             mainCoinCurrency : mainCoinCurrency[mainCoinId],
             coinsList : coinsList,
         })
-        
+
     } catch (error) {
         console.log('404'+error.message);
         res.status(500);

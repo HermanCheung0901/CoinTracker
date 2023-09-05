@@ -5,105 +5,260 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Crypto</title>
     <link rel="stylesheet" href="css/main.css" />
+    <!-- Font awesome -->
+    <script
+      src="https://kit.fontawesome.com/420f8fd081.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"
+      integrity="sha512-3gJwYpMe3QewGELv8k/BX9vcqhryRdzRMxVfq6ngyWXwo03GFEzjsUm8Q7RZcHPHksttq7/GFoxjCVUjkjvPdw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
   </head>
   <body>
     <div id="searchMenu">
       <input type="text" class="searchBar" placeholder="Search" />
-      <!-- <input type="submit" class="submitBtn" value="POST" formaction="/" /> -->
+      <button id="searchBtn">
+        <i class="fa-solid fa-magnifying-glass" style="color: #ffd523"></i>
+      </button>
       <div id="coinList">
-        <ul>
-          <% for (let i = 0; i < coinsList.length; i++) { %>
-          <li>
-            <div>
-              <%= coinsList[i].name %>
-              <form method="post" action="/">
-                <input
-                  type="hidden"
-                  name="symbol"
-                  value="<%= coinsList[i].name %>"
-                />
-                <input type="submit" class="submitBtn" value="POST" />
-              </form>
-            </div>
-          </li>
-          <% } %>
-        </ul>
+        <ul id="list"></ul>
       </div>
     </div>
 
     <div id="main">
-      <span>Currency: USD</span>
+      <!-- <span id="currency">Currency: USD</span>
+      <br /> -->
+      <span id="mainCoinName"><%= mainCoinInfo.name %></span>
       <br />
-      <span><%= mainCoinInfo.name %></span>
+      <span id="mainCoinCurrency">
+        <%= Math.round(mainCoinCurrency.usd *10000)/10000 %> <span class="fs-18">USD</span></span
+      >
       <br />
-      <span><%= mainCoinCurrency.usd %> USD</span>
-      <br />
-      <span>24h_change: <%= mainCoinCurrency.usd_24h_change %></span>
+      <span id="mainCoin24Change">
+      <% if(mainCoinCurrency.usd_24h_change > 0) { %>
+      <i class="fa-solid fa-arrow-trend-up" style="color: #14e117"></i> <span class="increase" 
+      >
+      
+      <% } else { %>
+        <% mainCoinCurrency.usd_24h_change = mainCoinCurrency.usd_24h_change*-1; %>
+      <i class="fa-solid fa-arrow-trend-down" style="color: #d81818"></i> <span class="reduce" 
+      >
+      <% } %>
+
+      <%= Math.round(mainCoinCurrency.usd_24h_change * 1000)/1000 %></span> USD</span
+      >
     </div>
 
-    <div id="multiChart">
-      <div class="chart">
-        <div class="left">
-          <span class="coinSymbol">BTC</span>
-          <span class="coinName">Bitcoin</span>
-        </div>
-        <div class="right">
-          <span class="price">36008</span>
-          <span class="priceChange">0.13153</span>
-        </div>
-      </div>
-      <div class="chart">
-        <div class="left">
-          <span class="coinSymbol">BTC</span>
-          <span class="coinName">Bitcoin</span>
-        </div>
-        <div class="right">
-          <span class="price">36008</span>
-          <span class="priceChange">0.13153</span>
-        </div>
-      </div>
-      <div class="chart">
-        <div class="left">
-          <span class="coinSymbol">BTC</span>
-          <span class="coinName">Bitcoin</span>
-        </div>
-        <div class="right">
-          <span class="price">36008</span>
-          <span class="priceChange">0.13153</span>
-        </div>
-      </div>
-      <div class="chart">
-        <div class="left">
-          <span class="coinSymbol">BTC</span>
-          <span class="coinName">Bitcoin</span>
-        </div>
-        <div class="right">
-          <span class="price">36008</span>
-          <span class="priceChange">0.13153</span>
-        </div>
-      </div>
-      <div class="chart">
-        <div class="left">
-          <span class="coinSymbol">BTC</span>
-          <span class="coinName">Bitcoin</span>
-        </div>
-        <div class="right">
-          <span class="price">36008</span>
-          <span class="priceChange">0.13153</span>
-        </div>
-      </div>
-      <div class="chart">
-        <div class="left">
-          <span class="coinSymbol">BTC</span>
-          <span class="coinName">Bitcoin</span>
-        </div>
-        <div class="right">
-          <span class="price">36008</span>
-          <span class="priceChange">0.13153</span>
-        </div>
-      </div>
-    </div>
+    <div id="multiChart"></div>
 
     <script src="index.js"></script>
+    <script>
+      let nameList = [];
+      let filter = [];
+      let data = [];
+      let startIndex = 0;
+      let endIndex = 14;
+      let loadItems = 15;
+      let searching = false;
+      let minChartLimit = 0;
+      let maxChartLimit = 5;
+
+      async function fetchApi() {
+        try {
+          // Fetch coin list data from CoinGecko API
+          const response = await fetch(
+            "https://api.coingecko.com/api/v3/coins/list?include_platform=true"
+          );
+          data = await response.json();
+
+          nameList = data.map((item) => item.name);
+
+          // Push all search result to filter array
+          if (searching) {
+            filter = nameList.filter((item) =>
+              search(
+                item.toLowerCase(),
+                $(".searchBar").val().toLowerCase().trim()
+              )
+            );
+          }
+
+          loadMoreItems();
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+
+      fetchApi();
+
+      function loadMoreItems() {
+        const list = searching ? filter : nameList;
+        if (list.length === 0) {
+          const notFoundHTML = "<p>Coin not found.</p>";
+          $("#list").empty();
+          $("#list").append(notFoundHTML);
+          return; // Exit the function to prevent further processing
+        }
+        for (let i = startIndex; i < endIndex && i < list.length; i++) {
+          const listItemHTML = `<li class="testItem">${list[i]}<br><form method="post" action="/">
+                <input type="hidden" name="coinName" value="${list[i]}" />     
+                <input type="submit" class="submitBtn" value="Get Current Price" />
+              </form>
+              <button class="addBtn"><i class="fa-solid fa-plus" style="color: #595260;"></i></button></li>`;
+          $("#list").append(listItemHTML);
+        }
+        startIndex += loadItems;
+        endIndex += loadItems;
+
+        addChart();
+      }
+
+      $("#searchBtn").click(function () {
+        const searchValue = $(".searchBar").val().toLowerCase().trim();
+        if (searchValue) {
+          searching = true;
+        } else {
+          searching = false;
+        }
+        startIndex = 0;
+        endIndex = 14;
+        $("#list").empty(); // Clear the previous list
+        fetchApi();
+      });
+
+      function search(item, searchValue) {
+        return item.includes(searchValue);
+      }
+
+      $("#coinList").scroll(function () {
+        const scrollContainer = this;
+        if (
+          Math.ceil(scrollContainer.scrollTop + scrollContainer.offsetHeight+1) >=
+          scrollContainer.scrollHeight
+        ) {
+          loadMoreItems();
+        }
+      });
+
+      function addChart() {
+        $(".addBtn").click(async function () {
+          const chartCount = $("#multiChart").children().length;
+          let coinInfo = {};
+
+          if (chartCount < maxChartLimit) {
+            // Get the coin name from the chart item
+            const coinName = $(this)
+              .parent()
+              .contents()
+              .filter(function () {
+                return this.nodeType === 3; // Filter out text nodes
+              })
+              .text()
+              .trim();
+            console.log(coinName);
+            // Find the coin information from the data array
+            coinInfo = data.find((coin) => coin.name === coinName);
+
+            // Make an API request to get the coin details
+            try {
+              const coinDetailsResponse = await fetch(
+                `https://api.coingecko.com/api/v3/simple/price?ids=${coinInfo.id}&vs_currencies=usd&include_24hr_change=true`
+              );
+              const coinDetails = await coinDetailsResponse.json();
+
+              // Extract the required information from the coinDetails response
+              const currentPrice =
+                Math.round(coinDetails[coinInfo.id].usd * 10000) / 10000;
+              const priceChangePercentage =
+                Math.round(coinDetails[coinInfo.id].usd_24h_change * 1000) /
+                1000;
+
+                const increase = '<i class="fa-solid fa-arrow-trend-up" style="color: #14e117"></i><span class="increase">' + priceChangePercentage + '</span>';
+                const reduce = '<i class="fa-solid fa-arrow-trend-down" style="color: #d81818"></i> <span class="reduce">' + priceChangePercentage*-1 + '</span>';
+
+              // Create the chart item HTML
+              const chartItem = `<div class="chart">
+          <div class="left">
+            <span class="coinSymbol">${coinInfo.symbol.toUpperCase()}</span>
+          </div>
+          <div class="right">
+            <span class="price">${currentPrice} <span class="fs-16">USD</span> </span>
+            <span class="priceChange">${priceChangePercentage > 0 ? increase : reduce} USD</span>
+          </div>
+          <button class="deleteBtn"><i class="fa-regular fa-circle-xmark fa-xl" style="color: #b2b1b9;"></i></button>
+        </div>`;
+
+              // Append the chart item to the multi-chart
+              $("#multiChart").append(chartItem);
+
+              // Add click event listener to the delete button of the newly added chart item
+              $(".deleteBtn").click(function () {
+                $(this).parent().remove();
+              });
+
+              saveChartItems();
+            } catch (error) {
+              console.error("Error:", error);
+            }
+          }
+        });
+      }
+
+      // Function to load chart items from local storage
+function loadChartItems() {
+  const chartItems = JSON.parse(localStorage.getItem('chartItems')) || [];
+  
+  chartItems.forEach((item) => {
+    const { symbol, currentPrice, priceChangePercentage } = item;
+    
+    const chartItem = `<div class="chart">
+      <div class="left">
+        <span class="coinSymbol">${symbol}</span>
+      </div>
+      <div class="right">
+        <span class="price">${currentPrice}</span>
+        <span class="priceChange">${priceChangePercentage}</span>
+      </div>
+      <button class="deleteBtn"><i class="fa-regular fa-circle-xmark fa-xl" style="color: #b2b1b9;"></i></button>
+    </div>`;
+    
+    $("#multiChart").append(chartItem);
+  });
+  
+  // Add click event listener to the delete buttons of the loaded chart items
+  $(".deleteBtn").click(function () {
+    $(this).parent().remove();
+    saveChartItems(); // Save the updated chart items
+  });
+}
+
+// Function to save chart items to local storage
+function saveChartItems() {
+  const chartItems = [];
+  
+  $(".chart").each(function () {
+    const symbol = $(this).find(".coinSymbol").text();
+    const currentPrice = $(this).find(".price").html();
+    const priceChangePercentage = $(this).find(".priceChange").html();
+    
+    chartItems.push({
+      symbol,
+      currentPrice,
+      priceChangePercentage
+    });
+  });
+  
+  localStorage.setItem('chartItems', JSON.stringify(chartItems));
+}
+
+// Call the loadChartItems() function when the page loads
+$(document).ready(function () {
+  loadChartItems();
+});
+
+    </script>
   </body>
 </html>
